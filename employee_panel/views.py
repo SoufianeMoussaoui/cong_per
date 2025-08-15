@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 
 from employee_panel.forms import LeaveForm, ProfileUpdateForm
-from myadmin.models import Leave, LeaveType, Employee, Department, Role
+from myadmin.models import Leave, LeaveType, Employee, Department, Role, Notification
 
 
 @login_required
@@ -52,9 +52,15 @@ def leave_history(request):
 
 @login_required
 def apply_leave(request):
+    
     error = ''
     msg = ''
 
+    notifications = Notification.objects.filter(user=request.user)
+    unread_count = notifications.filter(is_read=False).count()
+    notifications_list = list(notifications)
+    notifications.delete()
+    
     if request.method == "POST":
         form = LeaveForm(request.POST)
         if form.is_valid():
@@ -93,6 +99,8 @@ def apply_leave(request):
         'form': form,
         'error': error,
         'msg': msg,
+          'notifications': notifications_list,
+        'unread_count': unread_count
     })
 
     
