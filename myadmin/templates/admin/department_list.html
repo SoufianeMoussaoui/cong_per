@@ -1,66 +1,147 @@
-{% if user.is_authenticated %}
-    {% load static %}
-<!DOCTYPE html>
-<html class="no-js" lang="en">
+{% extends 'admin/main.html' %}
+{% load static %}
 
-<head>
-{% include 'admin/top.html' %}
-</head>
+{% block content %}
 
-<body>
-{% include 'admin/sidebars.html' %}
-<!---
-view department -->
-            <!-- page title area end -->
-            <div class="main-content-inner">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+<style>
+/* reuse the same modern styling used on the employees page */
+.container-card {
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+.table-card { width: 100%; }
 
-                            <div class="card-body">
-                                <div class="data-tables datatable-dark">
-                                    <center><a href="{% url 'myadmin:add_department' %}" class="btn btn-sm btn-info">Add New Department</a></center>    <h1>Department List</h1>
-    <table id="dataTable3" class="table table-hover table-striped text-center">
-        <thead class="text-capitalize">
-            <tr>
-                <th>Department Name</th>
-                <th>Short Name</th>
-                <th>Department Code</th>
-                <th>Creation Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for department in departments %}
-                <tr>
-                    <td>{{ department.department_name }}</td>
-                    <td>{{ department.department_shortname }}</td>
-                    <td>{{ department.department_code }}</td>
-                    <td>{{ department.CreationDate }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-                                    </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Dark table end -->
-                </div>
-                <!-- row area end -->
-                </div>
-                <!-- row area start-->
-            </div>
-    {% comment %}
-    	{% include 'footer.html' %}
-    {% endcomment %}
+.header-row { display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
+.search-input { max-width:420px; width:100%; }
+.table-hover tbody tr:hover { background: rgba(13,110,253,0.04); }
 
+.badge-status { font-size:.85rem; padding:.45em .6em; border-radius:.6rem; }
+.action-btn { margin-right:.35rem; }
+.no-data { padding:60px 0; color:#6c757d; }
+
+@media (max-width:780px) {
+  .header-row { flex-direction:column; align-items:stretch; }
+}
+</style>
+
+<div class="container-card mt-3">
+  <div class="card shadow-sm table-card">
+    <div class="card-body p-3">
+      <div class="header-row mb-3">
+        <div>
+          <h4 class="mb-0">Department List</h4>
         </div>
-        <!-- footer area end-->
-    </div>
-    <!-- main content area end -->
-    </div>
-{% include 'admin/bottom.html' %}
-</body>
 
-</html>
-{% endif %}
+        <div class="d-flex gap-2 align-items-center">
+          <form method="get" class="d-flex" role="search" style="gap:.5rem;">
+            <input name="q" value="{{ request.GET.q }}" class="form-control form-control-sm search-input" placeholder="Search name or code…" aria-label="Search">
+            <button class="btn btn-sm btn-outline-secondary" type="submit" aria-label="Search"><i class="fa fa-search"></i></button>
+          </form>
+
+          <a href="{% url 'myadmin:add_department' %}" class="btn btn-sm btn-primary">
+            <i class="fa fa-plus me-1"></i> Add Department
+          </a>
+        </div>
+      </div>
+
+      {% if messages %}
+        <div class="mb-2">
+          {% for m in messages %}
+            <div class="alert alert-{{ m.tags }} alert-dismissible fade show py-2" role="alert">
+              {{ m }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="table-responsive">
+        <table class="table table-borderless align-middle mb-0 table-hover">
+          <thead class="small text-muted">
+            <tr>
+              <th>Department Name</th>
+              <th>Short Name</th>
+              <th>Department Code</th>
+              <th>Creation Date</th>
+              <th style="min-width:160px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for department in departments %}
+            <tr>
+              <td class="fw-semibold">{{ department.department_name }}</td>
+              <td>{{ department.department_shortname }}</td>
+              <td class="text-muted">#{{ department.department_code }}</td>
+              <td class="small text-muted">{{ department.CreationDate }}</td>
+              <td>
+                <a href="{% url 'myadmin:update_department' department.id %}" class="btn btn-outline-primary btn-sm action-btn">
+                  <i class="fa fa-pen"></i> Edit
+                </a>
+                
+                <form method="post" action="{% url 'myadmin:delete_department' %}" style="display:inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="deptid" value="{{ department.id }}">
+                  <button class="btn btn-outline-danger btn-sm action-btn" type="submit">
+                    <i class="fa fa-trash"></i> Delete
+                  </button>
+                </form>
+                
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center no-data">
+                <div>
+                  <i class="fa fa-building fa-2x mb-2" aria-hidden="true"></i>
+                  <div class="fw-semibold">No departments found</div>
+                  <div class="small">Add a new department to get started.</div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {# Pagination (optional) #}
+      {% if is_paginated %}
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <div class="small text-muted">Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
+        <nav>
+          <ul class="pagination pagination-sm mb-0">
+            {% if page_obj.has_previous %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">Previous</a></li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {% endif %}
+
+            {% for p in page_obj.paginator.page_range %}
+              {% if p >= page_obj.number|add:'-2' and p <= page_obj.number|add:'2' %}
+                <li class="page-item {% if p == page_obj.number %}active{% endif %}">
+                  <a class="page-link" href="?page={{ p }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">{{ p }}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">Next</a></li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">Next</span></li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

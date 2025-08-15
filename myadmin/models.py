@@ -53,8 +53,13 @@ class Custome_user(AbstractUser):
 
 class Admin(models.Model):
     user = models.OneToOneField(Custome_user, on_delete=models.CASCADE, default=None)
-    fullname = models.CharField(max_length=255)
+    firstName = models.CharField(max_length=100, default="None")
+    lastName = models.CharField(max_length=100, default="None")
     email = models.EmailField(unique=True)
+    address = models.CharField(max_length=255, default="80100")
+    city = models.CharField(max_length=100, default="Mombasa")
+    country = models.CharField(max_length=100,default="None")
+    mobileno = models.CharField(max_length=20,default="0", blank=False, null=False)
     password = models.CharField(max_length=255)
     username = models.CharField(max_length=100, unique=True)
     CreationDate = models.DateField(auto_now_add=True)
@@ -72,7 +77,7 @@ class Department(models.Model):
 
     department_name = models.CharField(max_length=255)
     department_shortname = models.CharField(max_length=50)
-    department_code = models.CharField(max_length=10)
+    department_code = models.CharField(max_length=10, unique=True)
     CreationDate = models.DateField(auto_now_add=True)
 
     def __str__(self):
@@ -103,7 +108,7 @@ class Employee(models.Model):
     address = models.CharField(max_length=255, default="80100")
     city = models.CharField(max_length=100, default="Mombasa")
     country = models.CharField(max_length=100)
-    mobileno = models.CharField(max_length=10)
+    mobileno = models.CharField(max_length=20, blank=False, null=False)
     status = models.CharField(
         max_length=10,
         choices=EMP_CHOICES,

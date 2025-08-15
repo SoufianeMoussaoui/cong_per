@@ -1,86 +1,165 @@
+{% extends 'admin/main.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html class="no-js" lang="en">
-<head>
-{% include 'admin/top.html' %}
-</head>
-<body>
-{% include 'admin/sidebars.html' %}
-        <!-- Page title area end -->
-        <div class="main-content-inner">
-            <!-- Row area start -->
-            <div class="row">
-                <!-- Dark table start -->
-                <div class="col-12 mt-5">
-                    <div class="card">
-                        {% if error %}
-                        <div class="alert alert-danger alert-dismissible fade show">
-                            <strong>Info: </strong>{{ error|escape }}
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        {% elif msg %}
-                        <div class="alert alert-success alert-dismissible fade show">
-                            <strong>Info: </strong>{{ msg|escape }}
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        {% endif %}
+{% block content %}
 
-            <div class="main-content-inner">
-                <div class="row">
-                    <div class="col-12 mt-5">
-                        <div class="card">
-                            <div class="card-body">
-                                <!-- Include your success/error messages here -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-                                <center><a href="{% url 'myadmin:add_leave_type' %}" class="btn btn-sm btn-info">Add New Leave Type</a></center>
-                                <table id="dataTable3" class="table table-hover table-striped text-center">
-                                    <thead class="text-capitalize">
-                                        <tr>
-                                            <th>Id</th>
-                                            <th>Leave Type</th>
-                                            <th>Description</th>
-                                            <th>Created</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for leave_type in leave_types %}
-                                        <tr>
-                                            <td>{{ forloop.counter }}</td>
-                                            <td>{{ leave_type.leavetype }}</td>
-                                            <td>{{ leave_type.Description }}</td>
-                                            <td>{{ leave_type.PostingDate }}</td>
-                                            <td>
-                                                <a href="{% url 'myadmin:update_leave_type' lid=leave_type.id %}">
-    <i class="fa fa-edit" style="color:green"></i>
-</a>
-                                                <a href="{% url 'myadmin:leave_deleter' %}?del={{ leave_type.id }}" onclick="return confirm('Do you want to delete?');"><i class="fa fa-trash" style="color:red"></i></a>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<style>
+/* same visual system as departments/employees */
+.container-card {
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+.table-card { width: 100%; }
+.header-row { display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
+.search-input { max-width:420px; width:100%; }
+.table-hover tbody tr:hover { background: rgba(13,110,253,0.04); }
+.badge-status { font-size:.85rem; padding:.45em .6em; border-radius:.6rem; }
+.action-btn { margin-right:.35rem; }
+.no-data { padding:60px 0; color:#6c757d; }
+@media (max-width:780px) {
+  .header-row { flex-direction:column; align-items:stretch; }
+}
+</style>
+
+<div class="container-card mt-3">
+  <div class="card shadow-sm table-card">
+    <div class="card-body p-3">
+
+      <div class="header-row mb-3">
+        <div>
+          <h4 class="mb-0">Leave Types</h4>
         </div>
-    </div>
-                    </div>
-                </div>
-            </div>
+
+        <div class="d-flex gap-2 align-items-center">
+          <form method="get" class="d-flex" role="search" style="gap:.5rem;">
+            <input name="q" value="{{ request.GET.q }}" class="form-control form-control-sm search-input" placeholder="Search leave type or description…" aria-label="Search">
+            <button class="btn btn-sm btn-outline-secondary" type="submit" aria-label="Search"><i class="fa fa-search"></i></button>
+          </form>
+
+          <a href="{% url 'myadmin:add_leave_type' %}" class="btn btn-sm btn-primary">
+            <i class="fa fa-plus me-1"></i> Add New Leave Type
+          </a>
         </div>
+      </div>
+
+      {# Messages mapped to Bootstrap alert classes #}
+      {% if messages %}
+        <div class="mb-2">
+          {% for message in messages %}
+            {% comment %} Map Django message tags (e.g. 'error') to Bootstrap alert classes {% endcomment %}
+            <div class="alert 
+                {% if 'error' in message.tags or 'danger' in message.tags %}alert-danger
+                {% elif 'success' in message.tags %}alert-success
+                {% elif 'warning' in message.tags %}alert-warning
+                {% elif 'info' in message.tags %}alert-info
+                {% else %}alert-secondary
+                {% endif %}
+              alert-dismissible fade show py-2" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="table-responsive">
+        <table class="table table-borderless align-middle mb-0 table-hover">
+          <thead class="small text-muted">
+            <tr>
+              <th style="min-width:60px">#</th>
+              <th>Leave Type</th>
+              <th>Description</th>
+              <th style="min-width:140px">Created</th>
+              <th style="min-width:140px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for leave_type in leave_types %}
+            <tr>
+              <td class="fw-semibold">{{ forloop.counter }}</td>
+
+              <td class="fw-semibold">{{ leave_type.leavetype }}</td>
+
+              <td>
+                <div class="text-muted small" style="max-width:520px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                  {{ leave_type.Description }}
+                </div>
+              </td>
+
+              <td class="small text-muted">{{ leave_type.PostingDate }}</td>
+
+              <td>
+                <a href="{% url 'myadmin:update_leave_type' lid=leave_type.id %}" class="btn btn-outline-primary btn-sm action-btn">
+                  <i class="fa fa-pen"></i> Edit
+                </a>
+
+                <form method="post" action="{% url 'myadmin:leave_deleter' %}" style="display:inline;" onsubmit="return confirm('Do you want to delete this leave type?');">
+                {% csrf_token %}
+                    <input type="hidden" name="del" value="{{ leave_type.id }}">
+                        <button type="submit" class="btn btn-outline-danger btn-sm"> <i class="fa fa-trash"></i> Delete
+                        </button>
+                </form>
+
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center no-data">
+                <div>
+                  <i class="fa fa-file-alt fa-2x mb-2" aria-hidden="true"></i>
+                  <div class="fw-semibold">No leave types found</div>
+                  <div class="small">Add a leave type to get started.</div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {# Optional pagination block if you paginate leave_types #}
+      {% if is_paginated %}
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <div class="small text-muted">Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
+        <nav>
+          <ul class="pagination pagination-sm mb-0">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">Previous</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {% endif %}
+
+            {% for p in page_obj.paginator.page_range %}
+              {% if p >= page_obj.number|add:'-2' and p <= page_obj.number|add:'2' %}
+                <li class="page-item {% if p == page_obj.number %}active{% endif %}">
+                  <a class="page-link" href="?page={{ p }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">{{ p }}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">Next</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">Next</span></li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+      {% endif %}
+
     </div>
+  </div>
 </div>
 
-    </div>
-{% include 'admin/bottom.html' %}
-    <!-- Include your JavaScript links here -->
-</body>
-</html>
+{% endblock content %}

@@ -2,6 +2,9 @@ import email
 
 from django.contrib.auth.hashers import make_password
 import hashlib
+from io import BytesIO
+from django.core.files.base import ContentFile
+from django.db import transaction
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -12,15 +15,17 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Notification
 from django.contrib import messages
 from .forms import EmployeeForm, LeaveTypeForm, EmployeeUpdateForm, AdminForm, LeaveActionForm, DepartmentForm
-from .models import Admin, Department, Employee, LeaveType, Leave
+from .models import Admin, Department, Employee, LeaveType, Leave, Custome_user, Notification, Report
 from xhtml2pdf import pisa
 from django.shortcuts               import get_object_or_404
 from django.http                    import HttpResponse
 from django.template.loader         import get_template
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.urls import reverse
+from django.http import HttpResponseBadRequest
 from datetime import datetime
+from django.views.decorators.http import require_POST
 
-# Rest of your views...
 
 
 
@@ -50,14 +55,15 @@ def dashboard(request):
         return redirect('admin_login')
 
     leaves = Leave.objects.order_by('-id')[:7]
-    pending_leave_count = Leave.objects.filter(status='APPROVED').count()
+    pending_leave_count = Leave.objects.filter(status='PENDDING').count()
     notifications = Notification.objects.filter(user=request.user, is_read=False)[:5]
     leave_type_count = LeaveType.objects.count()
     employee_count = Employee.objects.count()
-    department_count = Department.objects.count()
-    leavetype_count = Leave.objects.filter(status='DECLINED').count()
-    leavtypcount = Leave.objects.filter(status='APPROVED').count()
+    leave_dec = Leave.objects.filter(status='DECLINED').count()
+    leave_appr = Leave.objects.filter(status='APPROVED').count()
     departements = Department.objects.all()
+    departement_count = Department.objects.all().count()
+
     context = {
         'page': 'dashboard',
         'leaves': leaves,
@@ -65,10 +71,11 @@ def dashboard(request):
         'pending_leave_count':pending_leave_count,
         'leave_type_count':leave_type_count,
         'employee_count':employee_count,
-        'department_count':department_count,
-        'leavetype_count':leavetype_count,
-        'leavtypcount':leavtypcount,
-        'departements':departements
+        'leave_dec':leave_dec,
+        'leave_appr':leave_appr,
+        'departement_count':departement_count,
+        'pending_leave_count' : pending_leave_count,
+        'departements' : departements
     }
 
     return render(request, 'admin/dashboard.html', context)
@@ -124,7 +131,7 @@ def add_employee(request):
         form = EmployeeForm(request.POST)
         if form.is_valid():
             # Create a new User and Employee instance
-            user = User.objects.create_user(
+            user = Custome_user.objects.create_user(
                 username=form.cleaned_data['empcode'],
                 email=form.cleaned_data['email'],
                 password=form.cleaned_data['password'],
@@ -147,18 +154,51 @@ def add_employee(request):
     return render(request, 'admin/add_employee.html', {'form': form})
 
 @login_required
-def delete_employee(request):
-    if request.method == "GET" and 'del' in request.GET:
-        empcode = request.GET.get('del')
-        try:
-            employee = Employee.objects.get(empcode=empcode)
-            employee.delete()
-            messages.success(request, "The selected employee account has been deleted")
-        except Employee.DoesNotExist:
-            messages.error(request, "Employee account not found")
+def toggle_status(request):
 
-    employee = Employee.objects.all()
-    return render(request, 'admin/employees.html', {'employee': employee})
+    if request.method == 'POST':
+        empcode = request.POST.get('empcode')
+        status = request.POST.get('status')
+    else:
+        # compatibility GET
+        empcode = request.GET.get('id') or request.GET.get('inid')
+        status = "Active" if request.GET.get('id') else "Inactive" if request.GET.get('inid') else None
+
+    if not empcode or not status:
+        messages.error(request, "Missing parameters.")
+        return redirect('myadmin:employees')
+
+    try:
+        emp = Employee.objects.get(empcode=empcode)
+        emp.status = status
+        emp.save()
+        messages.success(request, f"Employee {emp.empcode} set to {status}.")
+    except Employee.DoesNotExist:
+        messages.error(request, "Employee not found.")
+    return redirect('myadmin:employees')
+
+
+@login_required
+def delete_employee(request):
+
+    if request.method != 'POST':
+        return HttpResponseBadRequest("Invalid method")
+
+    emp_identifier = request.POST.get('empcode') or request.POST.get('del')
+    if not emp_identifier:
+        messages.error(request, "No employee specified.")
+        return redirect('myadmin:employees')
+
+    try:
+        with transaction.atomic():
+            emp = Employee.objects.get(empcode=emp_identifier)
+            emp.delete()
+            messages.success(request, f"Employee {emp_identifier} deleted.")
+    except Employee.DoesNotExist:
+        messages.error(request, "Employee not found.")
+
+    return redirect('myadmin:employees')
+
 
 @login_required
 def add_leave_type(request):
@@ -177,10 +217,8 @@ def add_leave_type(request):
         form = LeaveTypeForm()  # Render an empty form
 
     return render(request, 'admin/add_leave_type.html', {'form': form})
-@login_required
-def leave_type_list(request):
-    leave_types = LeaveType.objects.all()  # Query all leave types
-    return render(request, 'admin/leave_type_list.html', {'leave_types': leave_types})
+
+
 
 
 @login_required
@@ -231,9 +269,7 @@ def view_employee(request, empcode):
 
 @login_required
 def employee_leave_details(request, leave_id):
-    if not request.user.is_authenticated:
-        return redirect('myadmin:admin_login')  # Redirect to the login page if the user is not authenticated
-
+    
     error = ''
     msg = ''
     leave = Leave.objects.get(pk=leave_id)
@@ -247,6 +283,10 @@ def employee_leave_details(request, leave_id):
             leave.status = action  # Renamed from status to action
             leave.save()
             msg = "Leave updated Successfully"
+            Notification.objects.create(
+                user=leave.employee.user,
+                message=f"Your leave request from {leave.start_date} to {leave.end_date} has been {leave.status}."
+            )
         else:
             error = "Please correct the form errors."
     else:
@@ -284,6 +324,8 @@ def department(request):
 
     departments = Department.objects.all()
     return render(request, 'admin/department_list.html', {'departments': departments})
+
+
 @login_required
 def update_department(request, deptid):
     global department
@@ -350,39 +392,57 @@ def update_leave_type(request, lid):
     }
 
     return render(request, 'admin/update_leave_type.html', context)
+
+
 @login_required
 def employees(request):
 
-    if not request.user.is_authenticated:
-        return redirect('admin_login')  # Redirect to the appropriate URL
+    q = request.GET.get('q', '').strip()
+    qs = Employee.objects.select_related('department').all()
 
-    msg = None
+    if q:
+        # adjust search fields as needed
+        qs = qs.filter(
+            # empcode is PK (string)
+            Q(empcode__icontains=q) |
+            Q(firstName__icontains=q) |
+            Q(lastName__icontains=q) |
+            Q(department__department_name__icontains=q) |
+            Q(department__department_shortname__icontains=q)
+        )
 
+    # ordering and pagination
+    qs = qs.order_by('empcode')
+    page = request.GET.get('page', 1)
+    per_page = 12
+    paginator = Paginator(qs, per_page)
+    try:
+        page_obj = paginator.page(page)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+
+    # Legacy quick GET toggles (not recommended — prefer POST). Keeps compatibility.
     if request.method == 'GET':
-        if 'inid' in request.GET:
-            id = request.GET.get('inid')
-            status = "Inactive"
-            employee = Employee.objects.get(id=id)
-            employee.Status = status
-            employee.save()
-            return redirect('employees')
-
-        if 'id' in request.GET:
-            id = request.GET.get('id')
-            status = "Active"
-            employee = Employee.objects.get(id=id)
-            employee.Status = status
-            employee.save()
-            return redirect('employees')
-
-    employees = Employee.objects.all()
+        if 'id' in request.GET or 'inid' in request.GET:
+            emp_identifier = request.GET.get('id') or request.GET.get('inid')
+            emp = get_object_or_404(Employee, empcode=emp_identifier)
+            emp.status = "Active" if 'id' in request.GET else "Inactive"
+            emp.save()
+            messages.success(request, f"Employee {emp.empcode} set to {emp.status}.")
+            return redirect('myadmin:employees')
 
     context = {
-        'employees': employees,
-        'msg': msg
+        'employees': page_obj.object_list,
+        'page_obj': page_obj,
+        'is_paginated': page_obj.has_other_pages(),
+        'request': request,
     }
-
     return render(request, 'admin/employees.html', context)
+
+
+
 @login_required
 def leaves_history(request):     
 
@@ -391,6 +451,11 @@ def leaves_history(request):
 
 @login_required
 def leave_type_section(request):
+    leave_types = LeaveType.objects.all()  # Query all leave types
+    return render(request, 'admin/leave_type_section.html', {'leave_types': leave_types})
+
+@login_required
+def leave_deleter(request):
     if not request.user.is_authenticated:
         return redirect('admin_login')  # Redirect to the login page if not authenticated
 
@@ -406,6 +471,8 @@ def leave_type_section(request):
     leave_types = LeaveType.objects.all()
 
     return render(request, 'admin/leave_type_section.html', {'leave_types': leave_types})
+
+
 @login_required
 def manage_admin(request):
     if request.method == "GET" and 'del' in request.GET:
@@ -449,29 +516,6 @@ def employee_update(request, empcode):
   return render(request, 'admin/update.html', {'form': form, 'employee': employee})
 
 
-#count approved apps
-def approved_app_counter_view(request):
-
-    leavtypcount = Leave.objects.filter(status='APPROVED').count()
-
-    context = {
-        'leavtypcount': leavtypcount,
-    }
-
-    return render(request, 'admin/approvedapp-counter.html', context)
-
-
-def declined_leaves_counter(request):
-    leavetype_count = Leave.objects.filter(status='DECLINED').count()
-
-    return render(request, 'admin/declineapp-counter.html', {'leavetype_count': leavetype_count})
-
-
-def count_departments(request):
-    department_count = Department.objects.count()
-
-    return render(request, 'admin/dept-counter.html', {'department_count': department_count})
-
 
 def count_employees(request):
     employee_count = Employee.objects.count()
@@ -484,13 +528,9 @@ def count_leave_types(request):
 
     return render(request, 'leavetype-counter.html', {'leave_type_count': leave_type_count})
 
-
-def count_pending_leaves(request): 
-    pending_leave_count = Leave.objects.filter(status='PENDING').count()
-    return render(request, 'admin/pendingapp-counter.html', {'pending_leave_count': pending_leave_count})
-
 def is_manager(user):
     return user.is_staff or user.groups.filter(name="Managers").exists()
+
 
 
 
@@ -535,6 +575,43 @@ def monthly_dept_pdf(request):
         return HttpResponse(f'Erreur générant le PDF: {pisa_status.err}', status=500)
     return response
 
+@login_required
+def update_department(request, deptid):
+    department = get_object_or_404(Department, id=deptid)
 
-def screenshot_view(request):
-    return render(request, 'admin/test.html')
+    if request.method == 'POST':
+        form = DepartmentForm(request.POST, instance=department)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Department updated successfully.")
+            return redirect('myadmin:department')
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = DepartmentForm(instance=department)
+
+    return render(request, 'admin/update_department.html', {
+        'form': form,
+        'department': department
+    })
+
+
+@login_required
+@require_POST
+def delete_department(request):
+
+    deptid = request.POST.get('deptid')
+    if not deptid:
+        messages.error(request, "No department specified to delete.")
+        return redirect('myadmin:department')
+
+    department = get_object_or_404(Department, id=deptid)
+
+    
+    if department.employee_set.exists(): 
+        messages.error(request, "Cannot delete department with employees.", extra_tags='danger')
+        return redirect('myadmin:department')
+
+    department.delete()
+    messages.success(request, f"Department '{department.department_name}' deleted.")
+    return redirect('myadmin:department')

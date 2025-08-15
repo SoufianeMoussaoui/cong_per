@@ -72,3 +72,13 @@ class LeaveActionForm(forms.Form):
         }),
         required=True,
     )
+
+class DepartmentForm(forms.ModelForm):
+    class Meta:
+        model = Department
+        fields = ['department_name', 'department_shortname', 'department_code']
+        widgets = {
+            'department_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'department_shortname': forms.TextInput(attrs={'class': 'form-control'}),
+            'department_code': forms.TextInput(attrs={'class': 'form-control'}),
+        }

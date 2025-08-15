@@ -15,7 +15,7 @@
                                         <h4 class="header-title mb-0">Available Leave Types</h4>
                                     </div>
                                     <div class="d-flex justify-content-between pb-2">
-                                        <h1>{% include 'admin/leavetype-counter.html' %}</h1>
+                                        <h1>{{leave_type_count}}</h1>
                                         <span>Leave Types</span>
                                     </div>
                                 </div>
@@ -29,7 +29,7 @@
                                         <h4 class="header-title mb-0">Registered Employees</h4>
                                     </div>
                                     <div class= "d-flex justify-content-between pb-2">
-                                        <h1>{% include 'admin/emp-counter.html' %}</h1>
+                                        <h1>{{employee_count}}</h1>
                                         <span>Active Employees</span>
                                     </div>
                                 </div>
@@ -43,7 +43,7 @@
                                         <h4 class="header-title mb-0">Available Departments</h4>
                                     </div>
                                     <div class="d-flex justify-content-between pb-2">
-                                        <h1>{% include 'admin/dept-counter.html' %}</h1>
+                                        <h1>{{departement_count}}</h1>
                                         <span>Department</span>
                                     </div>
                                 </div>
@@ -62,7 +62,7 @@
                                         <h4 class="header-title mb-0">Pending Application</h4>
                                     </div>
                                     <div class="d-flex justify-content-between pb-2">
-                                        <h1>{% include 'admin/pendingapp-counter.html' %}</h1>
+                                        <h1>{{pending_leave_count}}</h1>
                                         <span>pending</span>
                                     </div>
                                 </div>
@@ -76,7 +76,7 @@
                                         <h4 class="header-title mb-0">Declined Application</h4>
                                     </div>
                                     <div class="d-flex justify-content-between pb-2">
-                                        <h1>{% include 'admin/declineapp-counter.html' %}</h1>
+                                        <h1>{{leave_dec}}</h1>
                                         <span>Declined</span>
                                     </div>
                                 </div>
@@ -90,7 +90,7 @@
                                         <h4 class="header-title mb-0">Approved Application</h4>
                                     </div>
                                     <div class="d-flex justify-content-between pb-2">
-                                        <h1>{% include 'admin/approvedapp-counter.html' %}</h1>
+                                        <h1>{{leave_appr}}</h1>
                                         <span>Approved</span>
                                     </div>
                                 </div>

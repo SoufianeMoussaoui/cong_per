@@ -104,16 +104,15 @@ def logout(request):
 
     
 @login_required()
-def update_profile(request, empcode):
+def update_profile(request):
+    employee = get_object_or_404(Employee, user=request.user)
 
-  employee = get_object_or_404(Employee, empcode=empcode)
+    form = ProfileUpdateForm(instance=employee)
 
-  form = ProfileUpdateForm(instance=employee)
+    if request.method == 'POST':
+        form = ProfileUpdateForm(request.POST, instance=employee)
+        if form.is_valid():
+            form.save()
+            return redirect('employee_panel:apply_leave')
 
-  if request.method == 'POST':
-    form = ProfileUpdateForm(request.POST, instance=employee)
-    if form.is_valid():
-      form.save()
-      return redirect('employee_panel:apply_leave')
-
-  return render(request, 'employee/update_profile.html', {'form': form, 'employee': employee})
+    return render(request, 'employee/update_profile.html', {'form': form, 'employee': employee})

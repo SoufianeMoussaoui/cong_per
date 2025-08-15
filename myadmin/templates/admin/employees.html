@@ -1,48 +1,259 @@
 {% extends 'admin/main.html' %}
+{% load static %}
 
 {% block content %}
 
- <center><a href="{% url 'myadmin:add_employee' %}" class="btn btn-sm btn-info">Add New Employee</a></center>
 
-                        <div class="card-body">
-                            <div class="data-tables datatable-dark">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 
+<style>
+/* modern touches *//* replace the previous .container-card rule */
+.container-card {
+  width: 100%;
+  max-width: none;        /* allow it to grow to the container width */
+  margin: 0 auto;
+  padding: 1.5rem;        /* adjust to keep internal spacing from the white panel edges */
+  box-sizing: border-box;
+}
+.table-card { width: 100%; } /* ensure card takes full width of .container-card */
 
-<table class="table table-dark table-borderless mb-0">
-  <thead>
-    <tr>
-      <th scope="col">Id</th>
-      <th scope="col">Name</th>
-      <th scope="col">Department</th>
-      <th scope="col">Joined On</th>
-      <th scope="col">Status</th>
-      <th scope="col">Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for employee in employees %}
-    <tr>
-      <td scope="row">{{ employee.empcode }}</td>
-      <td>{{ employee.firstName }} {{ employee.lastName }}</td>
-      <td>{{ employee.department }}</td>
-      <td>{{ employee.CreationDate }}</td>
-      <td>{{ employee.status }}</td>
-      <td>
-          <a href="{% url 'myadmin:view_employee' employee.empcode   %}" class="btn btn-secondary btn-sm">view</a>
-          <a href="{% url 'myadmin:update_employee' employee.empcode   %}" class="btn btn-secondary btn-sm">Edit</a>
-          <a href="{% url 'myadmin:delete_employee' %}?del={{ employee.empcode }}" onclick="return confirm('Do you want to delete?')">
-                                                        <i class="fa fa-trash" style="color:red"></i>
-                                                    </a>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
 
-{% if msg %}
-<div class="alert alert-success">
-  <strong>Info:</strong> {{ msg }}
+.header-row { display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
+.search-input { max-width:420px; width:100%; }
+.table-hover tbody tr:hover { background: rgba(13,110,253,0.04); }
+.avatar {
+  width:44px;height:44px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-weight:700;color:#fff;
+  background:linear-gradient(135deg,#6f42c1,#0d6efd);
+  margin-right:.75rem;
+}
+.badge-status { font-size:.85rem; padding:.45em .6em; border-radius:.6rem; }
+.action-btn { margin-right:.35rem; }
+.no-data { padding:60px 0; color:#6c757d; }
+@media (max-width:780px) {
+  .header-row { flex-direction:column; align-items:stretch; }
+}
+</style>
+
+<div class="container-card mt-3">
+  <div class="card shadow-sm table-card">
+    <div class="card-body p-3">
+      <div class="header-row mb-3">
+        <div>
+          <h4 class="mb-0">Employee Management</h4>
+        </div>
+
+        <div class="d-flex gap-2 align-items-center">
+          <form method="get" class="d-flex" role="search" style="gap:.5rem;">
+            <input name="q" value="{{ request.GET.q }}" class="form-control form-control-sm search-input" placeholder="Search code, name or department…" aria-label="Search">
+            <button class="btn btn-sm btn-outline-secondary" type="submit" aria-label="Search"><i class="fa fa-search"></i></button>
+          </form>
+
+          <a href="{% url 'myadmin:add_employee' %}" class="btn btn-sm btn-primary">
+            <i class="fa fa-plus me-1"></i> Add Employee
+          </a>
+        </div>
+      </div>
+
+      {# Messages (fallback if not present in base) #}
+      {% if messages %}
+        <div class="mb-2">
+          {% for m in messages %}
+            <div class="alert alert-{{ m.tags }} alert-dismissible fade show py-2" role="alert">
+              {{ m }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="table-responsive">
+        <table class="table table-borderless align-middle mb-0">
+          <thead class="small text-muted">
+            <tr>
+              <th style="min-width:320px">Employee</th>
+              <th style="min-width:160px">Department</th>
+              <th>Joined On</th>
+              <th style="min-width:120px">Status</th>
+              <th style="min-width:180px">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for employee in employees %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="avatar" title="{{ employee.firstName }} {{ employee.lastName }}">
+                 
+  {{ employee.firstName|default:""|slice:":1" }}{{ employee.lastName|default:""|slice:":1" }}
+                  </div>
+                  <div>
+                    <div class="fw-semibold">{{ employee.firstName }} {{ employee.lastName }}</div>
+                    <div class="small text-muted">#{{ employee.empcode }}</div>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <div>{{ employee.department }}</div>
+                {# If you want shortname: employee.department.department_shortname #}
+              </td>
+
+              <td>
+                <div class="small text-muted">{{ employee.CreationDate }}</div>
+              </td>
+
+              <td>
+                {% if employee.status == "Active" %}
+                  <span class="badge bg-success badge-status">Active</span>
+                {% elif employee.status == "Inactive" %}
+                  <span class="badge bg-secondary badge-status">Inactive</span>
+                {% else %}
+                  <span class="badge bg-info badge-status">{{ employee.status }}</span>
+                {% endif %}
+              </td>
+
+              <td>
+                <a href="{% url 'myadmin:view_employee' employee.empcode %}" class="btn btn-outline-secondary btn-sm action-btn">
+                  <i class="fa fa-eye"></i> View
+                </a>
+
+                <a href="{% url 'myadmin:update_employee' employee.empcode %}" class="btn btn-outline-primary btn-sm action-btn">
+                  <i class="fa fa-pen"></i> Edit
+                </a>
+
+                {# Status toggle form (POST) #}
+                <form method="post" action="{% url 'myadmin:toggle_status' %}" style="display:inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="empcode" value="{{ employee.empcode }}">
+                  {% if employee.status == "Active" %}
+                    <input type="hidden" name="status" value="Inactive">
+                    <button class="btn btn-outline-warning btn-sm action-btn" type="submit" title="Set Inactive">
+                      <i class="fa fa-user-slash"></i> Deactivate
+                    </button>
+                  {% else %}
+                    <input type="hidden" name="status" value="Active">
+                    <button class="btn btn-outline-success btn-sm action-btn" type="submit" title="Set Active">
+                      <i class="fa fa-user-check"></i> Activate
+                    </button>
+                  {% endif %}
+                </form>
+
+                {# Delete: open modal for confirmation #}
+                <button
+                  type="button"
+                  class="btn btn-outline-danger btn-sm"
+                  data-bs-toggle="modal"
+                  data-bs-target="#confirmDeleteModal"
+                  data-empcode="{{ employee.empcode }}"
+                  data-empname="{{ employee.firstName }} {{ employee.lastName }}"
+                >
+                  <i class="fa fa-trash"></i> Delete
+                </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center no-data">
+                <div>
+                  <i class="fa fa-users fa-2x mb-2" aria-hidden="true"></i>
+                  <div class="fw-semibold">No employees found</div>
+                  <div class="small">Try adjusting your search or add a new employee.</div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {# Pagination - preserves query param 'q' #}
+      {% if is_paginated %}
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <div class="small text-muted">Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
+        <nav>
+          <ul class="pagination pagination-sm mb-0">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">Previous</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {% endif %}
+
+            {# show a small window of pages: current -2 .. current +2 #}
+            {% for p in page_obj.paginator.page_range %}
+              {% if p >= page_obj.number|add:'-2' and p <= page_obj.number|add:'2' %}
+                <li class="page-item {% if p == page_obj.number %}active{% endif %}">
+                  <a class="page-link" href="?page={{ p }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">{{ p }}</a>
+                </li>
+              {% elif p == 1 and page_obj.number > 3 %}
+                <li class="page-item"><a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">1</a></li>
+                {% if page_obj.number > 4 %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+              {% elif p == page_obj.paginator.num_pages and page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
+                {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+                <li class="page-item"><a class="page-link" href="?page={{ p }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">{{ p }}</a></li>
+              {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}">Next</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">Next</span></li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
-{% endif %}
+
+{# Delete confirmation modal (posts to delete view) #}
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="post" action="{% url 'myadmin:delete_employee' %}">
+        {% csrf_token %}
+        <input type="hidden" name="empcode" id="modal-empcode" value="">
+        <div class="modal-header">
+          <h5 class="modal-title">Delete Employee</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to permanently delete <strong id="modal-empname"></strong>?</p>
+          <p class="small text-muted">This will also remove the linked user. This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-sm btn-danger">Yes, delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const deleteModal = document.getElementById('confirmDeleteModal');
+  if (!deleteModal) return;
+
+  deleteModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const empcode = button.getAttribute('data-empcode');
+    const empname = button.getAttribute('data-empname');
+
+    document.getElementById('modal-empcode').value = empcode;
+    document.getElementById('modal-empname').textContent = empname;
+  });
+});
+</script>
+
 {% endblock content %}
