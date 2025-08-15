@@ -1,0 +1,83 @@
+{% extends 'admin/main.html' %}
+{% load form_tags %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-sm rounded">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Add New Employee</h4>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'myadmin:add_employee' %}">
+                {% csrf_token %}
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="id_empcode" class="form-label">Registration No:</label>
+                        {{ form.empcode|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="id_email" class="form-label">Email:</label>
+                        {{ form.email|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="id_password" class="form-label">Password:</label>
+                        {{ form.password|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="id_firstName" class="form-label">First Name:</label>
+                        {{ form.firstName|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="id_lastName" class="form-label">Last Name:</label>
+                        {{ form.lastName|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="id_mobileno" class="form-label">Mobile Number:</label>
+                        {{ form.mobileno|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="id_country" class="form-label">Country:</label>
+                        {{ form.country|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="id_address" class="form-label">Address:</label>
+                        {{ form.address|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="id_city" class="form-label">City:</label>
+                        {{ form.city|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="id_department" class="form-label">Department:</label>
+                        {{ form.department|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="id_gender" class="form-label">Gender:</label>
+                        {{ form.gender|add_class:"form-select" }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="id_status" class="form-label">Status:</label>
+                        {{ form.status|add_class:"form-select" }}
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-success px-5">
+                        <i class="fa fa-user-plus"></i> Submit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

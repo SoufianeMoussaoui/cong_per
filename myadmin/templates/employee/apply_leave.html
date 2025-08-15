@@ -1,0 +1,464 @@
+{% extends 'employee/main.html' %}
+{% load form_tags %}
+{% block content %}
+
+<div class="main-content-inner">
+    <div class="row">
+        <div class="col-12">
+            <!-- Leave Application Card -->
+            <div class="card modern-leave-card">
+                <!-- Card Header -->
+                <div class="card-header bg-gradient text-white">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-circle">
+                            <i class="ti-calendar"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h4 class="mb-0">Leave Application Form</h4>
+                            <p class="mb-0 opacity-75">Submit your leave request for approval</p>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if error %}
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <strong>Error:</strong> {{ error }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endif %}
+
+                <!-- Card Body -->
+                <div class="card-body p-4">
+                    <form method="post" id="leaveForm" class="modern-form">
+                        {% csrf_token %}
+                        
+                        <!-- Leave Type Field -->
+                        <div class="form-group mb-4">
+                            <label for="{{ form.leavetype.id_for_label }}" class="form-label">
+                                <i class="ti-tag text-primary mr-2"></i>
+                                Leave Type <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                {{ form.leavetype }}
+                                {% if form.leavetype.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        <i class="ti-alert mr-1"></i>
+                                        {{ form.leavetype.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Date Range Row -->
+                        <div class="row">
+                            <!-- From Date -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label for="{{ form.fromdate.id_for_label }}" class="form-label">
+                                        <i class="ti-calendar text-success mr-2"></i>
+                                        From Date <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-wrapper">
+                                        {{ form.fromdate }}
+                                        {% if form.fromdate.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                <i class="ti-alert mr-1"></i>
+                                                {{ form.fromdate.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- To Date -->
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label for="{{ form.todate.id_for_label }}" class="form-label">
+                                        <i class="ti-calendar text-danger mr-2"></i>
+                                        To Date <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-wrapper">
+                                        {{ form.todate }}
+                                        {% if form.todate.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                <i class="ti-alert mr-1"></i>
+                                                {{ form.todate.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description Field -->
+                        <div class="form-group mb-4">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">
+                                <i class="ti-comment text-info mr-2"></i>
+                                Description / Reason <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-wrapper">
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        <i class="ti-alert mr-1"></i>
+                                        {{ form.description.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted mt-2">
+                                    Please provide a detailed reason for your leave request.
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions pt-4 border-top">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <span class="text-danger">*</span> Required fields
+                                </small>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary btn-modern mr-3" onclick="history.back()">
+                                        <i class="ti-arrow-left mr-2"></i>
+                                        Cancel
+                                    </button>
+                                    <button type="submit" class="btn btn-primary btn-modern" id="submitBtn">
+                                        <i class="ti-check mr-2"></i>
+                                        Submit Application
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Cards Row -->
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="info-card">
+                        <div class="d-flex align-items-center">
+                            <div class="info-icon bg-primary">
+                                <i class="ti-time"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h6 class="mb-0">Processing Time</h6>
+                                <small class="text-muted">2-3 business days</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="info-card">
+                        <div class="d-flex align-items-center">
+                            <div class="info-icon bg-success">
+                                <i class="ti-check"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h6 class="mb-0">Auto Approval</h6>
+                                <small class="text-muted">For 1-day leaves</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="info-card">
+                        <div class="d-flex align-items-center">
+                            <div class="info-icon bg-info">
+                                <i class="ti-email"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h6 class="mb-0">Email Updates</h6>
+                                <small class="text-muted">Real-time status</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Modern Leave Application Styles */
+.modern-leave-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.modern-leave-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.bg-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.icon-circle {
+    width: 50px;
+    height: 50px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 12px 16px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: #fff;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    transform: translateY(-2px);
+}
+
+.form-control:hover {
+    border-color: #ced4da;
+}
+
+select.form-control {
+    cursor: pointer;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.btn-modern {
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.btn-primary.btn-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.btn-secondary.btn-modern {
+    background: #6c757d;
+    color: white;
+}
+
+.alert-modern {
+    border-radius: 10px;
+    border: none;
+    margin: 20px;
+    margin-bottom: 0;
+    padding: 15px 20px;
+}
+
+.alert-success.alert-modern {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+}
+
+.alert-danger.alert-modern {
+    background: linear-gradient(135deg, #f8d7da 0%, #f1aeb5 100%);
+    color: #721c24;
+}
+
+.info-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.info-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.info-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+}
+
+.fade-in {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875em;
+    margin-top: 5px;
+}
+
+/* Loading spinner */
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .btn-group {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-modern {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .btn-modern.mr-3 {
+        margin-right: 0 !important;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form elements
+    const form = document.getElementById('leaveForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const fromDate = document.querySelector('input[name="fromdate"]');
+    const toDate = document.querySelector('input[name="todate"]');
+
+    // Set minimum dates
+    const today = new Date().toISOString().split('T')[0];
+    if (fromDate) fromDate.min = today;
+    if (toDate) toDate.min = today;
+
+    // Date validation
+    if (fromDate && toDate) {
+        fromDate.addEventListener('change', function() {
+            toDate.min = this.value;
+            if (toDate.value && toDate.value < this.value) {
+                toDate.value = this.value;
+            }
+        });
+
+        toDate.addEventListener('change', function() {
+            if (fromDate.value && this.value < fromDate.value) {
+                this.value = fromDate.value;
+            }
+        });
+    }
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        // Client-side validation
+        if (fromDate.value && toDate.value) {
+            const startDate = new Date(fromDate.value);
+            const endDate = new Date(toDate.value);
+            
+            if (endDate < startDate) {
+                e.preventDefault();
+                alert('End date must be after start date.');
+                return false;
+            }
+        }
+
+        // Show loading state
+        const originalContent = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="spinner mr-2"></span>Submitting...';
+        submitBtn.disabled = true;
+        
+        // Re-enable button if form submission fails
+        setTimeout(function() {
+            if (submitBtn.disabled) {
+                submitBtn.innerHTML = originalContent;
+                submitBtn.disabled = false;
+            }
+        }, 10000);
+    });
+
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert-modern');
+        alerts.forEach(function(alert) {
+            alert.style.transition = 'opacity 0.5s ease-out';
+            alert.style.opacity = '0';
+            setTimeout(function() {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 500);
+        });
+    }, 5000);
+
+    // Enhanced form interactions
+    const formControls = document.querySelectorAll('.form-control');
+    formControls.forEach(function(control) {
+        control.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        control.addEventListener('blur', function() {
+            this.parentElement.classList.remove('focused');
+        });
+    });
+});
+</script>
+
+
+{% include 'employee/footer.html' %}
+{% endblock content %}

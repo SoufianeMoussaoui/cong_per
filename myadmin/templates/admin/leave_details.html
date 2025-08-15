@@ -1,0 +1,56 @@
+{% extends "admin/main.html" %}
+{% load form_tags %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm rounded">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">Leave Details</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>Employee:</strong> {{ leave.employee.empcode }}</p>
+                    <p><strong>Leave Type:</strong> {{ leave.leave_type }}</p>
+                    <p><strong>Posting Date:</strong> {{ leave.submission_date }}</p>
+                    <p>
+                        <strong>Status:</strong>
+                        {% if leave.status == "APPROVED" %}
+                            <span class="badge bg-success">Approved</span>
+                        {% elif leave.status == "DECLINED" %}
+                            <span class="badge bg-danger">Declined</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% endif %}
+
+                    </p>
+
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_action" class="form-label">Action</label>
+                            {{ form.action|add_class:"form-select" }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_description" class="form-label">Description</label>
+                            {{ form.description|add_class:"form-control" }}
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Leave</button>
+                    </form>
+
+                    {% if error %}
+                        <div class="alert alert-danger mt-3">{{ error }}</div>
+                    {% endif %}
+                    {% if msg %}
+                        <div class="alert alert-success mt-3">{{ msg }}</div>
+                    {% endif %}
+
+                    <div class="mt-4">
+                        <a href="{% url 'myadmin:leave_history' %}" class="btn btn-outline-secondary">Back to Leave List</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

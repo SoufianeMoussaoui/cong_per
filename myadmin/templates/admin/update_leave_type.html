@@ -1,0 +1,28 @@
+{% extends 'admin/main.html' %}
+{% load form_tags %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Edit Leave Type</h2>
+    <form method="POST" class="needs-validation" novalidate>
+        {% csrf_token %}
+
+        <div class="form-group">
+            {{ form.leavetype.label_tag }}
+            {{ form.leavetype|add_class:"form-control" }}
+        </div>
+
+        <div class="form-group">
+            {{ form.Description.label_tag }}
+            {{ form.Description|add_class:"form-control" }}
+        </div>
+
+        <button type="submit" class="btn btn-success mt-3">Save Changes</button>
+
+        {% if msg %}
+        <div class="alert alert-success mt-3">
+            <strong>Info:</strong> {{ msg }}
+        </div>
+        {% endif %}
+    </form>
+</div>
+{% endblock content %}

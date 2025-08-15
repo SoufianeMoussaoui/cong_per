@@ -1,0 +1,211 @@
+{% extends 'admin/main.html' %}
+
+{% block content %}
+<div>
+            <!-- page title area end -->
+            <div class="main-content-inner">
+                <!-- sales report area start -->
+                <div class="sales-report-area mt-5 mb-5">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="single-report mb-xs-30">
+                                <div class="s-report-inner pr--20 pt--30 mb-3">
+                                    <div class="icon"><i class="fa fa-briefcase"></i></div>
+                                    <div class="s-report-title d-flex justify-content-between">
+                                        <h4 class="header-title mb-0">Available Leave Types</h4>
+                                    </div>
+                                    <div class="d-flex justify-content-between pb-2">
+                                        <h1>{% include 'admin/leavetype-counter.html' %}</h1>
+                                        <span>Leave Types</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="single-report mb-xs-30">
+                                <div class="s-report-inner pr--20 pt--30 mb-3">
+                                    <div class="icon"><i class="fa fa-users"></i></div>
+                                    <div class="s-report-title d-flex justify-content-between">
+                                        <h4 class="header-title mb-0">Registered Employees</h4>
+                                    </div>
+                                    <div class= "d-flex justify-content-between pb-2">
+                                        <h1>{% include 'admin/emp-counter.html' %}</h1>
+                                        <span>Active Employees</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="single-report">
+                                <div class="s-report-inner pr--20 pt--30 mb-3">
+                                    <div class="icon"><i class="fa fa-th-large"></i></div>
+                                    <div class="s-report-title d-flex justify-content-between">
+                                        <h4 class="header-title mb-0">Available Departments</h4>
+                                    </div>
+                                    <div class="d-flex justify-content-between pb-2">
+                                        <h1>{% include 'admin/dept-counter.html' %}</h1>
+                                        <span>Department</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="single-report mb-xs-30">
+                                <div class="s-report-inner pr--20 pt--30 mb-3">
+                                    <div class="icon"><i class="fa fa-spinner"></i></div>
+                                    <div class="s-report-title d-flex justify-content-between">
+                                        <h4 class="header-title mb-0">Pending Application</h4>
+                                    </div>
+                                    <div class="d-flex justify-content-between pb-2">
+                                        <h1>{% include 'admin/pendingapp-counter.html' %}</h1>
+                                        <span>pending</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="single-report mb-xs-30">
+                                <div class="s-report-inner pr--20 pt--30 mb-3">
+                                    <div class="icon"><i class="fa fa-times"></i></div>
+                                    <div class="s-report-title d-flex justify-content-between">
+                                        <h4 class="header-title mb-0">Declined Application</h4>
+                                    </div>
+                                    <div class="d-flex justify-content-between pb-2">
+                                        <h1>{% include 'admin/declineapp-counter.html' %}</h1>
+                                        <span>Declined</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="single-report">
+                                <div class="s-report-inner pr--20 pt--30 mb-3">
+                                    <div class="icon"><i class="fa fa-check-square-o"></i></div>
+                                    <div class="s-report-title d-flex justify-content-between">
+                                        <h4 class="header-title mb-0">Approved Application</h4>
+                                    </div>
+                                    <div class="d-flex justify-content-between pb-2">
+                                        <h1>{% include 'admin/approvedapp-counter.html' %}</h1>
+                                        <span>Approved</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- sales report area end -->
+
+                <!-- row area start -->
+                <div class="row">
+
+                    <!-- trading history area start -->
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                            <div class="d-sm-flex justify-content-between align-items-center">
+                                <div class="trd-history-tabs">
+                                    <ul class="nav" role="tablist">
+                                        <li>
+                                            <a class="active" data-toggle="tab" href="{% url 'myadmin:dashboard' %}" role="tab">Recent List</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <select class="custome-select border-0 pr-3">
+                                    <option selected>Last 24 Hours</option>
+                                </select>
+                            </div>
+                             <form method="get" action="{% url 'myadmin:monthly_dept_pdf' %}" class="form-inline mb-4 align-items-end">
+                                <div class="form-group mr-3">
+                                    <label for="dept">Département :</label>
+                                    <select name="dept" id="dept" class="form-control ml-2">
+                                        {% for d in departements %}
+                                       <option value="{{ d.department_shortname }}">{{ d.department_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    </div>
+                                    <div class="form-group mr-3">
+                                        <label for="month">Mois :</label>
+                                        <input type="month" id="month" name="month" class="form-control ml-2" placeholder="yyyy/mm" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fa fa-file-pdf-o"></i> Exporter PDF
+                                    </button>
+                                    </form>
+                            <div class="single-table">
+<div class="table-responsive">
+    <table class="table table-hover table-bordered table-dark progress-table text-center">
+        <thead class="text-uppercase">
+            <tr>
+                <th>S.N</th>
+                <th>Employee ID</th>
+                <th width="120">Full Name</th>
+                <th>Leave Type</th>
+                <th>Applied On</th>
+                <th>Current Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for leave in leaves %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+
+                {# Employee ID (empcode) #}
+                <td>{{ leave.employee.empcode }}</td>
+
+                {# Full name from related Employee → User #}
+                <td>
+                    {{ leave.employee.firstName }} {{ leave.employee.lastName }}
+                </td>
+
+                {# LeaveType label #}
+                <td>{{ leave.leave_type.leavetype }}</td>
+
+                {# Submission date #}
+                <td>{{ leave.submission_date|date:"Y-m-d H:i" }}</td>
+
+                {# Status via get_status_display() #}
+                <td>
+                    {% if leave.status == 'APPROVED' %}
+    <span class="badge bg-success">Approved</span>
+{% elif leave.status == 'DECLINED' %}
+    <span class="badge bg-danger">Declined</span>
+{% else %}
+    <span class="badge bg-warning text-dark">Pending</span>
+{% endif %}
+
+
+                </td>
+
+                {# Details button #}
+                <td>
+                    <a href="{% url 'myadmin:employee_leave_details' leave.id %}" class="btn btn-secondary btn-sm">View
+                        Details</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">No leave records found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% endblock content %}

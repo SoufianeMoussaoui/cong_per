@@ -1,0 +1,72 @@
+<!-- myadmin/templates/admin/monthly_dept_report.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: sans-serif; }
+    h1  { text-align: center; margin-bottom: 20px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #333;
+      padding: 6px;
+      text-align: left;
+    }
+    th { background: #f0f0f0; }
+    .small { font-size: 0.9em; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>
+    Leave Report — {{ department.department_name }}<br>
+    <span class="small">({{ month_label }})</span>
+  </h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Employee Code</th>
+        <th>Full Name</th>
+        <th>Leave Type</th>
+        <th>Comment</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Submitted On</th>
+        <th>Status</th>
+        <th>Decision Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for leave in leaves %}
+        {% with emp=leave.employee %}
+        <tr>
+          <td>{{ emp.empcode }}</td>
+          <td>{{ emp.firstName }} {{ emp.lastName }}</td>
+          <td>{{ leave.leave_type.leavetype }}</td>
+          <td>{{ leave.comment|default:"—" }}</td>
+          <td>{{ leave.start_date }}</td>
+          <td>{{ leave.end_date }}</td>
+          <td>{{ leave.submission_date|date:"Y-m-d H:i" }}</td>
+          <td>{{ leave.get_status_display }}</td>
+          <td>
+            {% if leave.decision_date %}
+              {{ leave.decision_date|date:"Y-m-d H:i" }}
+            {% else %}
+              &mdash;
+            {% endif %}
+          </td>
+        </tr>
+        {% endwith %}
+      {% empty %}
+        <tr>
+          <td colspan="9" style="text-align:center">No leave records for this month</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

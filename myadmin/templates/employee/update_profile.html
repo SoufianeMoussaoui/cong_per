@@ -1,0 +1,72 @@
+<!-- update_profile.html -->
+
+{% extends 'employee/main.html' %}
+{% block content %}
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+
+<body>
+    <!-- Place your HTML content here, including the update profile form -->
+    <form method="post" action="{% url 'employee_panel:update_profile' user.employee.empcode %}">
+            {% csrf_token %}
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="id_firstName">First Name:</label>
+                        {{ form.firstName }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="id_lastName">Last Name:</label>
+                        {{ form.lastName }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="id_mobileno">Mobile Number:</label>
+                        {{ form.mobileno }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="id_country">Country:</label>
+                        {{ form.country }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="id_address">Address:</label>
+                        {{ form.address }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="id_city">City:</label>
+                        {{ form.city }}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="id_firstName">gender:</label>
+                                {{ form.gender }}
+                            </div>
+                        </div>
+                        </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+    <!-- Include Bootstrap JS and jQuery at the end of the body -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+{% include 'employee/footer.html' %}
+{% endblock content %}
+

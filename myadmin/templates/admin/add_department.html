@@ -1,0 +1,41 @@
+{% extends 'admin/main.html' %}
+
+{% load form_tags %} 
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm rounded">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">Add Department</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'myadmin:add_department' %}">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="id_department_name" class="form-label">Department Name</label>
+                            {{ form.department_name|add_class:"form-control" }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_department_shortname" class="form-label">Short Name</label>
+                            {{ form.department_shortname|add_class:"form-control" }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_department_code" class="form-label">Department Code</label>
+                            {{ form.department_code|add_class:"form-control" }}
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success">
+                            <i class="fa fa-plus"></i> Add Department
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

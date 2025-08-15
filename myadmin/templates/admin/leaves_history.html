@@ -1,0 +1,92 @@
+
+{% extends 'admin/main.html' %}
+{% load static %}
+{% block content %}
+
+<div class="main-content-inner">
+    <div class="container-fluid mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-12">
+                <div class="card shadow-sm rounded">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Employee Leave Details</h4>
+                    </div>
+                    <div class="card-body">
+  <div class="table-responsive">
+    <table class="table table-hover table-bordered text-center align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Employee ID</th>
+          <th>Full Name</th>
+          <th>Department</th>
+          <th>Leave Type</th>
+          <th>Applied On</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for leave in leave_history %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+
+            {# 1) Employee ID (primary key field empcode) #}
+            <td>{{ leave.employee.empcode }}</td>
+
+            {# 2) Full Name from the Employee model #}
+            <td>
+              {{ leave.employee.firstName }} {{ leave.employee.lastName }}
+            </td>
+
+            {# 3) Department name via the FK on Employee #}
+            <td>{{ leave.employee.department.department_name }}</td>
+
+            {# 4) Leave Type label #}
+            <td>{{ leave.leave_type.leavetype }}</td>
+
+            {# 5) Submission date formatted #}
+            <td>{{ leave.submission_date|date:"Y-m-d H:i" }}</td>
+
+            {# 6) Human‐readable status with badge #}
+            <td>
+            {% if leave.status == 'APPROVED' %}
+    <span class="badge bg-success">Approved</span>
+{% elif leave.status == 'DECLINED' %}
+    <span class="badge bg-danger">Declined</span>
+{% else %}
+    <span class="badge bg-warning text-dark">Pending</span>
+{% endif %}
+
+
+            </td>
+
+            {# 7) Action button #}
+            <td>
+              <a
+                href="{% url 'myadmin:employee_leave_details' leave.id %}"
+                class="btn btn-outline-secondary btn-sm"
+              >
+                View Details
+              </a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="8" class="text-center text-muted">
+              No leave records found.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+                </div>
+            </div>
+        </div>
+    </div> 
+</div>
+
+{% endblock content %}

@@ -1,0 +1,93 @@
+{% extends 'admin/main.html' %}
+
+{% load form_tags %}
+
+{% block content %}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm rounded">
+                <div class="card-header bg-info text-white text-center">
+                    <h4 class="mb-0">Update Employee</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'myadmin:update_employee' employee.empcode %}">
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="id_firstName">First Name</label>
+                                    {{ form.firstName|add_class:"form-control" }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="id_lastName">Last Name</label>
+                                    {{ form.lastName|add_class:"form-control" }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="id_mobileno">Mobile Number</label>
+                                    {{ form.mobileno|add_class:"form-control" }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="id_country">Country</label>
+                                    {{ form.country|add_class:"form-control" }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="id_address">Address</label>
+                                    {{ form.address|add_class:"form-control" }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="id_city">City</label>
+                                    {{ form.city|add_class:"form-control" }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="id_department">Department</label>
+                                    {{ form.department|add_class:"form-control" }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="id_status">Status</label>
+                                    {{ form.status|add_class:"form-control" }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="id_gender">Gender</label>
+                                    {{ form.gender|add_class:"form-control" }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="fa fa-save"></i> Update
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

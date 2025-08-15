@@ -1,0 +1,48 @@
+{% extends 'admin/main.html' %}
+
+{% block content %}
+
+ <center><a href="{% url 'myadmin:add_employee' %}" class="btn btn-sm btn-info">Add New Employee</a></center>
+
+                        <div class="card-body">
+                            <div class="data-tables datatable-dark">
+
+
+
+<table class="table table-dark table-borderless mb-0">
+  <thead>
+    <tr>
+      <th scope="col">Id</th>
+      <th scope="col">Name</th>
+      <th scope="col">Department</th>
+      <th scope="col">Joined On</th>
+      <th scope="col">Status</th>
+      <th scope="col">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for employee in employees %}
+    <tr>
+      <td scope="row">{{ employee.empcode }}</td>
+      <td>{{ employee.firstName }} {{ employee.lastName }}</td>
+      <td>{{ employee.department }}</td>
+      <td>{{ employee.CreationDate }}</td>
+      <td>{{ employee.status }}</td>
+      <td>
+          <a href="{% url 'myadmin:view_employee' employee.empcode   %}" class="btn btn-secondary btn-sm">view</a>
+          <a href="{% url 'myadmin:update_employee' employee.empcode   %}" class="btn btn-secondary btn-sm">Edit</a>
+          <a href="{% url 'myadmin:delete_employee' %}?del={{ employee.empcode }}" onclick="return confirm('Do you want to delete?')">
+                                                        <i class="fa fa-trash" style="color:red"></i>
+                                                    </a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if msg %}
+<div class="alert alert-success">
+  <strong>Info:</strong> {{ msg }}
+</div>
+{% endif %}
+{% endblock content %}

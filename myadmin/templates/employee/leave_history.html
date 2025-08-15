@@ -1,0 +1,78 @@
+{% extends 'employee/main.html' %}
+{% block content %}
+<link
+  rel="stylesheet"
+  href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+/>
+
+<div class="container">
+  <h1 class="text-center my-5">Leave History</h1>
+  <table class="table table-striped table-bordered">
+    <thead class="thead-dark">
+      <tr>
+        <th>#</th>
+        <th>Type</th>
+        <th>Reason</th>
+        <th>From</th>
+        <th>To</th>
+        <th>Applied</th>
+        <th>Admin’s Remark</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for leave in leave_history %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <!-- LeaveType instance -->
+          <td>{{ leave.leave_type.leavetype }}</td>
+          <!-- Comment field -->
+          <td>{{ leave.comment }}</td>
+          <!-- start_date / end_date -->
+          <td>{{ leave.start_date }}</td>
+          <td>{{ leave.end_date }}</td>
+          <!-- submission_date formatted -->
+          <td>{{ leave.submission_date|date:"Y-m-d H:i" }}</td>
+
+          <!-- Latest remark from LeaveHistory -->
+          <td>
+            {% with last=leave.history.last %}
+              {% if last %}
+                {{ last.action }}{% if last.actor %} by {{ last.actor.username }}{% endif %}
+              {% else %}
+                —
+              {% endif %}
+            {% endwith %}
+          </td>
+
+          <!-- Human-readable status -->
+          <td>
+          
+              {% if leave.status == 'APPROVED' %}
+    <span class="badge bg-success">Approved</span>
+{% elif leave.status == 'DECLINED' %}
+    <span class="badge bg-danger">Declined</span>
+{% else %}
+    <span class="badge bg-warning text-dark">Pending</span>
+{% endif %}
+
+
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="8" class="text-center py-4">
+            You have no leave history.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Bootstrap JS (optional) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+{% include 'employee/footer.html' %}
+{% endblock %}

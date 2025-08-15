@@ -1,0 +1,66 @@
+{% if user.is_authenticated %}
+    {% load static %}
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+{% include 'admin/top.html' %}
+</head>
+
+<body>
+{% include 'admin/sidebars.html' %}
+<!---
+view department -->
+            <!-- page title area end -->
+            <div class="main-content-inner">
+
+
+                            <div class="card-body">
+                                <div class="data-tables datatable-dark">
+                                    <center><a href="{% url 'myadmin:add_department' %}" class="btn btn-sm btn-info">Add New Department</a></center>    <h1>Department List</h1>
+    <table id="dataTable3" class="table table-hover table-striped text-center">
+        <thead class="text-capitalize">
+            <tr>
+                <th>Department Name</th>
+                <th>Short Name</th>
+                <th>Department Code</th>
+                <th>Creation Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for department in departments %}
+                <tr>
+                    <td>{{ department.department_name }}</td>
+                    <td>{{ department.department_shortname }}</td>
+                    <td>{{ department.department_code }}</td>
+                    <td>{{ department.CreationDate }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+                                    </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Dark table end -->
+                </div>
+                <!-- row area end -->
+                </div>
+                <!-- row area start-->
+            </div>
+    {% comment %}
+    	{% include 'footer.html' %}
+    {% endcomment %}
+
+        </div>
+        <!-- footer area end-->
+    </div>
+    <!-- main content area end -->
+    </div>
+{% include 'admin/bottom.html' %}
+</body>
+
+</html>
+{% endif %}
