@@ -1,0 +1,9 @@
+Prévision des absences
+
+L’IA peut détecter des tendances (ex. : beaucoup de demandes de congé en août ou pendant certaines fêtes).
+
+Cela permet d’anticiper les périodes critiques et de mieux répartir les équipes.
+
+Équilibrage des effectifs
+
+Si trop d’employés d’un même service demandent congé en même temps, l’IA peut proposer une réorganisation ou suggérer des dates alternatives.
