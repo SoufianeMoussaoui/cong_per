@@ -111,7 +111,6 @@ def add_department(request):
     if request.method == 'POST':
         form = DepartmentForm(request.POST)
         if form.is_valid():
-            # Optional cleanup logic
             Department.objects.filter(
                 Q(department_name__isnull=True) | Q(department_shortname__isnull=True)
             ).delete()
@@ -140,10 +139,9 @@ def add_employee(request):
 
             )
 
-            employee = form.save(commit=False)  # Create an Employee instance but don't save it yet
-            employee.user = user  # Associate the user with the employee
-            employee.save()  # Now save the employee to the database
-
+            employee = form.save(commit=False)  
+            employee.user = user 
+            employee.save()  
             # Redirect to a success page or handle success as needed
             messages.success(request, 'New employee has been added successfully')
             return redirect('myadmin:employees')
@@ -160,7 +158,6 @@ def toggle_status(request):
         empcode = request.POST.get('empcode')
         status = request.POST.get('status')
     else:
-        # compatibility GET
         empcode = request.GET.get('id') or request.GET.get('inid')
         status = "Active" if request.GET.get('id') else "Inactive" if request.GET.get('inid') else None
 
@@ -401,7 +398,6 @@ def employees(request):
     qs = Employee.objects.select_related('department').all()
 
     if q:
-        # adjust search fields as needed
         qs = qs.filter(
             # empcode is PK (string)
             Q(empcode__icontains=q) |
@@ -411,7 +407,7 @@ def employees(request):
             Q(department__department_shortname__icontains=q)
         )
 
-    # ordering and pagination
+
     qs = qs.order_by('empcode')
     page = request.GET.get('page', 1)
     per_page = 12
@@ -422,8 +418,7 @@ def employees(request):
         page_obj = paginator.page(1)
     except EmptyPage:
         page_obj = paginator.page(paginator.num_pages)
-
-    # Legacy quick GET toggles (not recommended — prefer POST). Keeps compatibility.
+        
     if request.method == 'GET':
         if 'id' in request.GET or 'inid' in request.GET:
             emp_identifier = request.GET.get('id') or request.GET.get('inid')

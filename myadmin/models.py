@@ -4,13 +4,7 @@ from django.contrib.auth.models import User,AbstractUser
 from django.db import models
 from datetime import date
 
-"""
-STATUS_CHOICES = (
-    (0, 'Pending'),
-    (1, 'Approved'),
-    (2, 'Declined'),
-)
-"""
+
 
 STATUS_CHOICES = (
     ('PENDING', 'Pending'),
@@ -42,10 +36,8 @@ class ReportType(models.TextChoices):
     PDF = 'PDF', 'PDF'
     CSV = 'CSV', 'CSV'
 
-# -- Extend default User to include role --
 class Custome_user(AbstractUser):
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.EMPLOYE)
-    # inherits username, email, password, etc.
 
     def __str__(self):
         return self.get_full_name() or self.username

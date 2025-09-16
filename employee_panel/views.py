@@ -35,7 +35,6 @@ def change_password(request):
 
 @login_required
 def leave_history(request):
-    # 1) Get the Employee tied to this User
     employee = get_object_or_404(Employee, user=request.user)
     leaves = (
         Leave.objects
@@ -64,28 +63,24 @@ def apply_leave(request):
     if request.method == "POST":
         form = LeaveForm(request.POST)
         if form.is_valid():
-            # 1) Get the currently logged-in user and corresponding employee
             user = request.user
             employee = get_object_or_404(Employee, user=user)
-
-            # 2) Extract form data
             leave_type = form.cleaned_data['leavetype']
             start_date = form.cleaned_data['fromdate']
             end_date   = form.cleaned_data['todate']
             comment    = form.cleaned_data['description']
 
-            # 3) Validate date range
             if (end_date - start_date).days < 0:
                 error = "End Date should be after Start Date."
             else:
-                # 4) Create the leave request
+
                 Leave.objects.create(
                     employee    = employee,
                     leave_type  = leave_type,
                     start_date  = start_date,
                     end_date    = end_date,
                     comment     = comment,
-                    status      = 'PENDING',  # Use string value
+                    status      = 'PENDING', 
                     is_read     = False,
                 )
                 msg = "Your leave application has been submitted."
@@ -108,7 +103,7 @@ def apply_leave(request):
 def logout(request):
     # Clear session data
     request.session.flush()
-    return redirect('accounts:employee_login')  # Redirect to the 'index' URL name or any other URL
+    return redirect('accounts:employee_login')  
 
     
 @login_required()
